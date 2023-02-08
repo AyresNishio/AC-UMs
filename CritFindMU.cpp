@@ -5,7 +5,7 @@
 #include<math.h>
 
 #include<string>
-#include <fstream>
+#include<fstream>
 #include<time.h>
 
 using namespace std;
@@ -356,21 +356,21 @@ void step4_update(int* nSols, int* Sols, int* iscrit, int* combs)
 
 void show_completition_percentage(long long int n_analysed_combs)
 {
-    if (n_analysed_combs > Cn[n_meas * (n_colums_Cn)/ + card]/4 && !p25)
-            {
-                printf("25%% ->");
-                p25 = 1;
-            }
-            if (n_analysed_combs > Cn[n_meas * (n_colums_Cn) + card] / 2 && !p50)
-            {
-                printf("50%% ->");
-                p50 = 1;
-            }
-            if (n_analysed_combs > Cn[n_meas * (n_colums_Cn) + card] * 3 / 4 && !p75)
-            {
-                printf("75%%");
-                p75 = 1;
-            }
+    if (n_analysed_combs > Cn[n_MU * (n_colums_Cn) + card]/4 && p25==0)
+    {
+        printf("25%% ->");
+        p25 = 1;
+    }
+    if (n_analysed_combs > Cn[n_MU * (n_colums_Cn) + card]/2 && p50==0)
+    {
+        printf("50%% ->");
+        p50 = 1;
+    }
+    if (n_analysed_combs > Cn[n_MU * (n_colums_Cn) + card] * 3 / 4 && p75==0)
+    {
+        printf("75%%");
+        p75 = 1;
+    }
 }
 
 void save_results(int * Sols, int n_sols, int* UMs)
