@@ -25,7 +25,7 @@ def build_jacobian_matrix(A,medidas):
 
             if (de==para)and(medidas[ind,4]==2):#medida de injecao de Potencia
                 nbc=int(sum(A[de,:]))
-                for l in range(n-1):
+                for l in range(n):
                     if (l==de):
                         H[med,l]=nbc
                     else:

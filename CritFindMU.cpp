@@ -17,12 +17,13 @@ string in_file_name = "Caso.txt";
 
 //Parametros da Saida
 string out_file_name = "Saida.csv";
+string time_out_file_name = "Saida_tempos.csv";
 int sol_Size = 10000;
 
 //Parametros do Sitema
-int n_MU;
-int n_meas;
-int kmax;
+int n_MU; // Numero de Unidades de medicao no plano
+int n_meas; // Numero de medidas do plano
+int kmax; //Cardinalidade maxima avaliada
 
 //Estutura da matriz de resultados de combinações (Cn)
 string Cn_file_name = "combs1000em5.txt";
@@ -42,6 +43,14 @@ bool p25 = 0;
 bool p50 = 0;
 bool p75 = 0;
 
+int y=0;
+
+//Variaveis de tempo
+struct t_results{ 
+    clock_t t_start, t_end;
+    clock_t t_start_card[10], t_end_card[10];
+};
+
 void load_case (double* &E, int* &meas_plan, int* &UMs);
 
 void step1_enumeration(int* combs, long long int combsIdini);
@@ -56,7 +65,7 @@ void step4_update(int* nSols, int* Sols, int* iscrit, int* combs);
 
 void show_completition_percentage(long long int n_analysed_combs);
 
-void save_results(int * Sols, int n_sols, int* meas_plan);
+void save_results(int * Sols, int n_sols,t_results times, int* meas_plan);
 
 int main()
 { 
@@ -65,7 +74,9 @@ int main()
     double* E;     // Matriz Covariancia E [n_meas x n_meas]
     load_case(E,meas_plan,UMs);
     cout<<"nMUs: " << n_MU << "; nMeds: " <<n_meas<< "; kmax: " <<kmax<< '\n';
-      
+
+
+    t_results times;
     // Conjunto Solucao
     int nSols=0;
     int* Sols;
@@ -78,11 +89,12 @@ int main()
     // Vetor booleano  1: Combinacao critica 0: Combinacao nao
     int* is_crit; 
     is_crit = (int*)malloc(wave_size * sizeof(int));
-
+    times.t_start = clock();
     for (card = 1; card <=kmax ;card++)
     {
         cout << "->Cardinalidade " << card<<'\n';
         cout << "Iniciado...\n";
+        times.t_start_card[card-1]=clock();
         long long int n_analysed_combs = 0; // Combinacoes vizitadas em todas as ondas
         //FILE* combs_file;
         while (n_analysed_combs < Cn[n_MU * (n_colums_Cn) + card])
@@ -90,16 +102,9 @@ int main()
             n_combs_in_wave = min(wave_size, Cn[n_MU * (n_colums_Cn) + card] - n_analysed_combs);
             //Enumerar
             step1_enumeration(combs,n_analysed_combs+1);
-            // combs_file = fopen("Combsfile.csv", "w");
-            // for (int i = 0; i<n_combs_in_wave; i++){
-            //     for (int j = 0; j<kmax; j++){
-            //         fprintf(combs_file ,"%i;",combs[i*kmax+j]);
-            //         }fprintf(combs_file ,"\n");
-            // }
-            // fprintf(combs_file ,"\n");
-            
             //Prop. 1
             step2_evaluation(is_crit, E, combs, UMs, meas_plan);
+            int crits =0;
             //Prop. 2
             for (int sol =0; sol<nSols; sol++)
             {
@@ -114,12 +119,14 @@ int main()
             show_completition_percentage(n_analysed_combs);
             
         }
+        times.t_end_card[card-1] = clock();
         printf("\nFinalizado!\n"); p25=0; p50=0;p75=0; 
         //fclose(combs_file);
     }
+    times.t_end = clock();
 
-    save_results(Sols, nSols, UMs);
-    
+    save_results(Sols, nSols,times, UMs);
+
     free(UMs);
     free(meas_plan);
     free(E);
@@ -214,8 +221,8 @@ void step1_enumeration(int* combs, long long int combsIdinicial)
                                                                                                                                                                                                                                                    
 void step2_evaluation(int *is_crit, double* E, int* combs, int* MUs, int* meas_plan)
 {
+    
     for (int ind =0; ind<n_combs_in_wave; ind++){
-		
         // Identifica medidas que fazem parte da UM
         int meas_number[50];
         int ind_meas = 0;
@@ -235,6 +242,7 @@ void step2_evaluation(int *is_crit, double* E, int* combs, int* MUs, int* meas_p
         // Avalia sub-matriz E
         double Ei[100*100];
         build_aux_covariance(Ei, E, meas_number, ind_meas, ind);
+        
         if (!(is_invertible(Ei, ind_meas))) {
             is_crit[ind] = 1;
         }
@@ -262,7 +270,6 @@ void build_aux_covariance(double *Ei, double* E, int* meas_number, int n_um_meas
 
 bool is_invertible(double *mat, int m) 
 {
-
 	bool inv;
 	double pivo = 0.;
 	for (int i = 0; i < m; i++) {
@@ -284,7 +291,6 @@ bool is_invertible(double *mat, int m)
 			mat[i * m + j] = mat[indmaior * m + j];
 			mat[indmaior * m + j] = swap;
 		}
-		
 		pivo = mat[i*m + i];
 		if (abs(pivo) < 0.0000000001) {
 			inv = 0;
@@ -293,7 +299,6 @@ bool is_invertible(double *mat, int m)
 
 		for (int j = 0; j < m; j++) {
 			mat[i*m + j] = mat[i*m + j] / pivo;
-
 		}
 
 
@@ -373,7 +378,7 @@ void show_completition_percentage(long long int n_analysed_combs)
     }
 }
 
-void save_results(int * Sols, int n_sols, int* UMs)
+void save_results(int * Sols, int n_sols,t_results times, int* UMs)
 {
     int n_crits[n_rows_Cn]={0};
     for (int i = 0; i<n_sols;i++){
@@ -386,6 +391,16 @@ void save_results(int * Sols, int n_sols, int* UMs)
         n_crits[j-1]++;
         //cout << '\n';
     }
+
+    double total_time = double(times.t_end - times.t_start) / double(CLOCKS_PER_SEC);
+    printf( "tempo total: %f\n", total_time);
+
+    double total_card_time[10];
+    for ( int i = 0;  i<kmax; i++){
+        total_card_time[i] = double(times.t_end_card[i] - times.t_start_card[i]) / double(CLOCKS_PER_SEC);   
+        printf("Tempo total card %d: %f\n",i,total_card_time[i]);
+    }
+
     //cout << "Maior maitriz invertida: "<< max_mat_size;
     FILE* Output_file;
     Output_file = fopen(out_file_name.c_str(), "w");
@@ -395,10 +410,17 @@ void save_results(int * Sols, int n_sols, int* UMs)
     }
     fprintf(Output_file ," Total de tuplas criticas de UM: %i\n", n_sols + 1);
 
-    fprintf(Output_file, "Número de combinacoes analisadas por cardinalidade\n");
+    fprintf(Output_file, "Numero de combinacoes analisadas por cardinalidade\n");
     for (int i = 1; i <= kmax; i++)
         fprintf(Output_file, "%i; %lld\n", i, Cn[n_MU * (n_colums_Cn) + i]);
-
+    
+    
+    fprintf(Output_file ,"Tempo total: \n");
+    fprintf(Output_file ,"%f \n",total_time);
+    fprintf(Output_file ,"Tempo total por cardinalidade: \n");
+    for ( int i = 0;  i<kmax; i++){
+        fprintf(Output_file ,"%d; %f\n",i+1,total_card_time[i]);
+    }
    
     for (int i = 0; i<n_sols;i++){
         int j = 0; 
@@ -413,3 +435,4 @@ void save_results(int * Sols, int n_sols, int* UMs)
     
     fclose(Output_file);
 }
+

@@ -3,10 +3,16 @@ Cardinalidade;numero de Cks
 2;2
 3;1
  Total de tuplas criticas de UM: 6
-Número de combinacoes analisadas por cardinalidade
+Numero de combinacoes analisadas por cardinalidade
 1; 8
 2; 28
 3; 56
+Tempo total: 
+0.000000 
+Tempo total por cardinalidade: 
+1; 0.000000
+2; 0.000000
+3; 0.000000
 UM9;
 UM6;
 UM7;UM8;
