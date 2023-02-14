@@ -59,7 +59,8 @@ void step2_evaluation(int *is_crit, double* E, int* combs, int* MUs, int* meas_p
 void build_aux_covariance(double *Ei, double* E, int* meas, int n_um_meas, int n_comb);
 bool is_invertible(double *mat, int m);
 
-void step3_confirmation(int* is_crit, int *combs, int* conjSol, int sol);
+void step3_confirmation(int* is_crit, int *combs, int* conjSol, int n_sols);
+bool is_subset(int* B, int n, int* A, int m);
 
 void step4_update(int* nSols, int* Sols, int* iscrit, int* combs);
 
@@ -106,10 +107,8 @@ int main()
             step2_evaluation(is_crit, E, combs, UMs, meas_plan);
             int crits =0;
             //Prop. 2
-            for (int sol =0; sol<nSols; sol++)
-            {
-                step3_confirmation(is_crit, combs, Sols, sol);
-            }
+            step3_confirmation(is_crit, combs, Sols, nSols);
+            
             //Atualização
             step4_update(&nSols, Sols, is_crit, combs);
 
@@ -319,31 +318,43 @@ bool is_invertible(double *mat, int m)
 }
 
 
-void step3_confirmation(int* is_crit, int *combs, int* conjSol, int sol)
+void step3_confirmation(int* is_crit, int *combs, int* conjSol, int n_sol)
 {
     for (int crit = 0; crit < n_combs_in_wave; crit++)
     {
-        if(is_crit[crit]==1)
-        {
-            int is = 0;
-            int i = 0;
-            int j = 0;
-            while(conjSol[sol * kmax + i]!=-1 && i<card)
+        if(is_crit[crit]==1){
+            for (int sol = 0; sol<n_sol; sol++)
             {
-                for (j = 0; j < card; j++)
-                {
-                    if (conjSol[sol * kmax + i]==combs[crit*kmax+j])
-                        break;
+                int m = 0;
+                while (conjSol[sol*kmax+m]!=-1 && m<kmax) m++;
+                int* solution = conjSol+sol*kmax;
+                int* combination = combs+crit*kmax;
+                if( is_subset(solution,m,combination,card)){
+                    is_crit[crit] = 0;
+                    break;
                 }
-                if (j == card)
-                    is = 1;
-                i++;
             }
-            is_crit[crit] = is;
         }
     }
 }
-
+bool is_subset(int* B, int n, int* A, int m){
+    int i = 0;
+    int j = 0;
+    while(i<n && j<m)
+    {
+        //cout<<i<<';'<<j<<'\n';
+        if(B[i]>A[j]){
+            j++;}
+        else if(B[i]==A[j]){
+            i++;
+            j++;
+        }
+        else if(B[i]<A[j])
+            return false;
+    }
+    if(i<n) return false;
+    else    return true;
+}
 
 void step4_update(int* nSols, int* Sols, int* iscrit, int* combs)
 {
@@ -385,12 +396,13 @@ void save_results(int * Sols, int n_sols,t_results times, int* UMs)
         int j = 0; 
         while(Sols[i*kmax+j]!=-1 && j<kmax)
         {
-            //cout << UMs[Sols[i*kmax+j]]<< ' ';
+            //cout <<"UM"<< UMs[Sols[i*kmax+j]]<< ' ';
             j++;
         }
         n_crits[j-1]++;
         //cout << '\n';
     }
+    for (int i = 0; i<kmax; i++) cout <<"#C"<<i+1<<": "<< n_crits[i]<<'\n';
 
     double total_time = double(times.t_end - times.t_start) / double(CLOCKS_PER_SEC);
     printf( "tempo total: %f\n", total_time);
@@ -398,7 +410,7 @@ void save_results(int * Sols, int n_sols,t_results times, int* UMs)
     double total_card_time[10];
     for ( int i = 0;  i<kmax; i++){
         total_card_time[i] = double(times.t_end_card[i] - times.t_start_card[i]) / double(CLOCKS_PER_SEC);   
-        printf("Tempo total card %d: %f\n",i,total_card_time[i]);
+        printf("Tempo total card %d: %f\n",i+1,total_card_time[i]);
     }
 
     //cout << "Maior maitriz invertida: "<< max_mat_size;

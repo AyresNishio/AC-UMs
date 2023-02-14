@@ -12,13 +12,13 @@ Numero de combinacoes analisadas por cardinalidade
 4; 5985
 5; 20349
 Tempo total: 
-0.106000 
+0.016000 
 Tempo total por cardinalidade: 
-1; 0.000000
+1; 0.009000
 2; 0.000000
 3; 0.000000
-4; 0.016000
-5; 0.090000
+4; 0.007000
+5; 0.000000
 UM29;
 UM28;
 UM25;
