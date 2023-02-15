@@ -11,14 +11,16 @@ Numero de combinacoes analisadas por cardinalidade
 3; 1330
 4; 5985
 5; 20349
+Maior matriz invertida
+12
 Tempo total: 
-0.106000 
+0.015000 
 Tempo total por cardinalidade: 
 1; 0.000000
 2; 0.000000
 3; 0.000000
-4; 0.016000
-5; 0.090000
+4; 0.000000
+5; 0.000000
 UM29;
 UM28;
 UM25;

@@ -37,7 +37,7 @@ def build_jacobian_matrix(A,medidas):
     if (existe_medida_fasorial):
         return H
     else:
-        Haux=H[:,1:n-1]
+        Haux=H[:,1:n]
         return Haux
 
 def build_gain_matrix(H):

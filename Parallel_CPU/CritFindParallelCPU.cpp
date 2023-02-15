@@ -186,6 +186,9 @@ void load_case(double* &E, int* &meas_plan, int* &UMs)
 
 void step1_enumeration(int* combs, long long int combsIdinicial)
 {
+    #pragma omp parallel
+    {
+    #pragma omp for
     for (int linha= 0; linha< n_combs_in_wave; linha++){
         int nZ = n_MU - card;
         int nO = card;
@@ -212,12 +215,15 @@ void step1_enumeration(int* combs, long long int combsIdinicial)
              combs[linha * kmax + j] = -1;
         }
     }
+    }
 }  
 
                                                                                                                                                                                                                                                    
 void step2_evaluation(int *is_crit, double* E, int* combs, int* MUs, int* meas_plan)
 {
-    
+    #pragma omp paralel
+    {
+    #pragma omp for
     for (int ind =0; ind<n_combs_in_wave; ind++){
         if (is_crit[ind] == 1)
         {
@@ -250,6 +256,7 @@ void step2_evaluation(int *is_crit, double* E, int* combs, int* MUs, int* meas_p
             free(meas_number);
             free(Ei);
         }
+    }
     }
 }
 
@@ -320,6 +327,9 @@ bool is_invertible(double *mat, int m)
 
 void step3_confirmation(int* is_crit, int *combs, int* conjSol, int n_sol)
 {
+    #pragma omp parallel
+    {
+    #pragma omp for
     for (int crit = 0; crit < n_combs_in_wave; crit++)
     {
         is_crit[crit]=1;
@@ -334,6 +344,7 @@ void step3_confirmation(int* is_crit, int *combs, int* conjSol, int n_sol)
                 break;
             }
         }
+    }
     }
 }
 bool is_subset(int* B, int n, int* A, int m){
@@ -425,7 +436,7 @@ void save_results(int * Sols, int n_sols,t_results times, int* UMs)
     for (int i = 1; i <= kmax; i++)
         fprintf(Output_file, "%i; %lld\n", i, Cn[n_MU * (n_colums_Cn) + i]);
     
-    
+    fprintf(Output_file,"Maior matriz invertida\n%d\n",max_mat_size);
     fprintf(Output_file ,"Tempo total: \n");
     fprintf(Output_file ,"%f \n",total_time);
     fprintf(Output_file ,"Tempo total por cardinalidade: \n");
