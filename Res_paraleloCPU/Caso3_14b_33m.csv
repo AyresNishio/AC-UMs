@@ -1,0 +1,28 @@
+Cardinalidade;numero de Cks
+1;2
+2;2
+3;1
+4;0
+5;0
+ Total de tuplas criticas de UM: 6
+Numero de combinacoes analisadas por cardinalidade
+1; 8
+2; 28
+3; 56
+4; 70
+5; 56
+Maior matriz invertida
+0
+Tempo total: 
+0.000000 
+Tempo total por cardinalidade: 
+1; 0.000000
+2; 0.000000
+3; 0.000000
+4; 0.000000
+5; 0.000000
+UM9;
+UM6;
+UM7;UM8;
+UM1;UM2;
+UM2;UM3;UM4;
