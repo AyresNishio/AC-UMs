@@ -8,7 +8,9 @@
 #include<fstream>
 #include<time.h>
 
-using namespace std;
+using std::cout;
+using std::string;
+using std::ifstream;
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
@@ -243,7 +245,7 @@ void step2_evaluation(int *is_crit, double* E, int* combs, int* MUs, int* meas_p
                     }
                 }
             }
-            //if(max_mat_size<ind_meas) max_mat_size=ind_meas;
+            if(max_mat_size<ind_meas) max_mat_size=ind_meas;
             // Avalia sub-matriz E
             double Ei[100*100];
             build_aux_covariance(Ei, E, meas_number, ind_meas, ind);
@@ -438,6 +440,7 @@ void save_results(int * Sols, int n_sols,t_results times, int* UMs)
     for (int i = 1; i <= kmax; i++)
         fprintf(Output_file, "%i; %lld\n", i, Cn[n_MU * (n_colums_Cn) + i]);
     
+
     fprintf(Output_file,"Maior matriz invertida\n%d\n",max_mat_size);
     fprintf(Output_file ,"Tempo total: \n");
     fprintf(Output_file ,"%f \n",total_time);
@@ -445,7 +448,30 @@ void save_results(int * Sols, int n_sols,t_results times, int* UMs)
     for ( int i = 0;  i<kmax; i++){
         fprintf(Output_file ,"%d; %f\n",i+1,total_card_time[i]);
     }
-   
+
+    
+    int* results;
+    results = (int*)calloc(n_MU*kmax,sizeof(int));
+    int sol = 0;
+    for (int i =0; i <kmax; i++){
+        for (int j = 0; j < n_crits[i]; j++){
+            for(int k = 0; k < i+1;k++){
+                results[Sols[sol*kmax+k]*kmax + i]++;
+            }
+            sol++;
+        }
+    }
+    fprintf(Output_file,"UMs por cardinalidade\n");
+    for (int i =0; i <n_MU; i++)
+    {
+        fprintf(Output_file,"UM%i;",i+1);
+        for (int j = 0; j<kmax; j++)
+        {
+            fprintf(Output_file,"%i;",  results[i*kmax+j]);
+        }
+        fprintf(Output_file,"\n");
+    }
+     free(results);
     for (int i = 0; i<n_sols;i++){
         int j = 0; 
         while(Sols[i*kmax+j]!=-1 && j<kmax)
@@ -455,8 +481,6 @@ void save_results(int * Sols, int n_sols,t_results times, int* UMs)
         }
         fprintf(Output_file,"\n");
     }
-        
-    
     fclose(Output_file);
 }
 

@@ -8,7 +8,9 @@
 #include<fstream>
 #include<time.h>
 
-using namespace std;
+using std::cout;
+using std::string;
+using std::ifstream;
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 

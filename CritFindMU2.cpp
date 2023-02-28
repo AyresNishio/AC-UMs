@@ -8,7 +8,9 @@
 #include<fstream>
 #include<time.h>
 
-using namespace std;
+using std::cout;
+using std::string;
+using std::ifstream;
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
@@ -37,6 +39,7 @@ int card;
 long long int n_combs_in_wave;
 
 int max_mat_size=0;
+int n_inverted_mat[10]={0};
 
 //Variaveis de percentual
 bool p25 = 0;
@@ -221,6 +224,7 @@ void step2_evaluation(int *is_crit, double* E, int* combs, int* MUs, int* meas_p
     for (int ind =0; ind<n_combs_in_wave; ind++){
         if (is_crit[ind] == 1)
         {
+            n_inverted_mat[card]++;
             // Identifica medidas que fazem parte da UM
             int meas_number[50];
             int ind_meas = 0;
@@ -404,7 +408,10 @@ void save_results(int * Sols, int n_sols,t_results times, int* UMs)
     for (int i = 0; i<kmax; i++) cout <<"#C"<<i+1<<": "<< n_crits[i]<<'\n';
 
     double total_time = double(times.t_end - times.t_start) / double(CLOCKS_PER_SEC);
-    printf( "tempo total: %f\n", total_time);
+    printf( "Tempo total: %f\n", total_time);
+    printf( "Maior matriz: %dx%d\n", max_mat_size,max_mat_size);
+    printf( "# Matrizes invertidas:");
+    for (int i = 0; i<kmax; i++) cout <<i+1<<": "<< n_inverted_mat[i+1]<<'\n';
 
     double total_card_time[10];
     for ( int i = 0;  i<kmax; i++){
